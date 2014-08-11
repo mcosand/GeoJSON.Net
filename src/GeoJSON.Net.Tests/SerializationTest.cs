@@ -17,6 +17,26 @@ namespace GeoJSON.Net.Tests
     [TestClass]
     public class SerializationTest
     {
+      [TestMethod]
+      public void LineString_Coordinate_Serialization()
+      {
+        string expected = "\"coordinates\":[[102.0,0.0],[103.0,1.0],[104.0,0.0],[105.0,1.0]]";
+        var feature = new GeoJSON.Net.Feature.Feature(
+          new LineString(new List<IPosition> {
+            new GeographicPosition(0.0, 102.0),
+            new GeographicPosition(1.0, 103.0),
+            new GeographicPosition(0.0, 104.0),
+            new GeographicPosition(1.0, 105.0),
+          }), new Dictionary<string, object>
+          {
+            { "name", "Dinagat Islands" }
+          });
+
+        var serialized = GetSerialized(feature, false);
+
+        Assert.AreNotEqual(-1, serialized.IndexOf(expected), expected + "\n" + serialized);
+      }
+
         /// <summary>
         /// Serializes the whole Polygon with properties
         /// </summary>
@@ -26,9 +46,15 @@ namespace GeoJSON.Net.Tests
             var point = new GeoJSON.Net.Geometry.Point(new GeoJSON.Net.Geometry.GeographicPosition(45.79012, 15.94107));
             var featureProperties = new Dictionary<string, object> { {"Name", "Foo"} };
             var model = new GeoJSON.Net.Feature.Feature(point, featureProperties);
-            var serializedData = JsonConvert.SerializeObject(model, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver(), NullValueHandling = NullValueHandling.Ignore });
+            var serializedData = GetSerialized(model);
 
             Assert.IsFalse(serializedData.Contains("longitude"));
+        }
+
+        private static string GetSerialized(object model, bool indent = true)
+        {
+          var serializedData = JsonConvert.SerializeObject(model, indent ? Formatting.Indented : Formatting.None, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver(), NullValueHandling = NullValueHandling.Ignore });
+          return serializedData;
         }
 
         [TestMethod]
